@@ -114,3 +114,21 @@ def test_create_new_artist_from_form(page, test_web_address, db_connection):
     page.fill("input[name=genre]", "Pop")
 
     page.click("text='Add Artist'")
+    name_tag = page.locator(".t-name")
+    expect(name_tag).to_have_text("Artist: Test Artist")
+    genre_tag = page.locator(".t-genre")
+    expect(genre_tag).to_have_text("Genre: Pop")
+
+"""
+When we create a new artist using the html form without passing a value name or genre
+The form shows some errors
+"""
+def test_create_new_artist_from_form_with_errors(page, test_web_address, db_connection):
+    page.set_default_timeout(1000)
+    db_connection.seed('seeds/music_web_app.sql')
+    page.goto(f"http://{test_web_address}/artists")
+    page.click("text='Add new artist'")
+    page.click("text='Add Artist'")
+
+    errors_tag = page.locator(".t-errors")
+    expect(errors_tag).to_have_text("Your form contained errors: Name can't be blank, Genre can't be blank")

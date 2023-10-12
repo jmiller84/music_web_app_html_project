@@ -118,6 +118,10 @@ def create_artist():
     genre = request.form['genre']
     new_artist = Artist(None, name, genre)
 
+    if not new_artist.is_valid():
+        errors = new_artist.generate_errors()
+        return render_template("artists/new_artist.html", errors=errors)
+
     repository.create(new_artist)
 
     return redirect(f"/artists/{new_artist.id}")

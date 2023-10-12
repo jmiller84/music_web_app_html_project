@@ -8,6 +8,9 @@
     <h1>Add new artist</h1>
     <br>
     <form action="/artists" method="POST">
+        {% if errors %}
+        <div class="t-errors">Your form contained errors: {{errors}}</div>
+        {% endif %}
 
         <p>
             <label for="name">Artist Name:</label>
