@@ -1,7 +1,5 @@
 from playwright.sync_api import Page, expect
 
-
-
 # Tests for your routes go here
 
 def test_get_albums(page, test_web_address, db_connection):
@@ -110,4 +108,9 @@ def test_create_new_artist_from_form(page, test_web_address, db_connection):
     page.set_default_timeout(1000)
     db_connection.seed('seeds/music_web_app.sql')
     page.goto(f"http://{test_web_address}/artists")
-    page.click("text='Add new artist'")
+    page.click("text='Add new artist'") # test that there is a button with the text 'Add new artist'
+
+    page.fill("input[name=name]", "Test Artist") 
+    page.fill("input[name=genre]", "Pop")
+
+    page.click("text='Add Artist'")

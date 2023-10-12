@@ -109,22 +109,42 @@ def get_artists():
 
 
 # POST /artists
-@app.route('/artists', methods = ['POST'])
-def post_artists():
-    if has_invalid_artist_parameters(request.form):
-        return "You need to submit a name and a genre", 400
+@app.route("/artists", methods = ['POST'])
+def create_artist():
     connection = get_flask_database_connection(app)
     repository = ArtistRepository(connection)
+
     name = request.form['name']
     genre = request.form['genre']
-
     new_artist = Artist(None, name, genre)
+
     repository.create(new_artist)
-    return '', 200
+
+    return redirect(f"/artists/{new_artist.id}")
+
+
+#GET /artists/new_artist
+@app.route('/artists/new_artist')
+def get_artist_new():
+    return render_template('artists/new_artist.html')
+
+
+# @app.route('/artists', methods = ['POST'])
+# def post_artists():
+#     if has_invalid_artist_parameters(request.form):
+#         return "You need to submit a name and a genre", 400
+#     connection = get_flask_database_connection(app)
+#     repository = ArtistRepository(connection)
+#     name = request.form['name']
+#     genre = request.form['genre']
+
+#     new_artist = Artist(None, name, genre)
+#     repository.create(new_artist)
+#     return '', 200
     
-def has_invalid_artist_parameters(form):
-    return 'name' not in form or \
-        'genre' not in form
+# def has_invalid_artist_parameters(form):
+#     return 'name' not in form or \
+#         'genre' not in form
 
 
 # These lines start the server if you run this file directly
