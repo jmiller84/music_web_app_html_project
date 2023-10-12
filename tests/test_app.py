@@ -65,3 +65,49 @@ def test_link_from_artists_to_single_artist_page(page, test_web_address, db_conn
     h1_tag = page.locator("h1")
     expect(h1_tag).to_have_text(["Artist: Pixies"])
 
+"""
+When we create a new album 
+It appears in the list of albums
+"""
+def test_create_new_album_using_form(page, test_web_address, db_connection):
+    page.set_default_timeout(1000)
+    db_connection.seed('seeds/music_web_app.sql')
+    page.goto(f"http://{test_web_address}/albums")
+    page.click("text='Add new album'")
+
+    page.fill("input[name=title]", "Test Album")
+    page.fill("input[name=release_year]", "2023")
+    page.fill("input[name=artist_id]", "1")
+
+    page.click("text='Add Album'")
+    title_tag = page.locator(".t-title")
+    expect(title_tag).to_have_text("Album: Test Album")
+    release_year_tag = page.locator(".t-release_year")
+    expect(release_year_tag).to_have_text("Release year: 2023")
+    artist_id_tag = page.locator(".t-artist_id")
+    expect(artist_id_tag).to_have_text("Artist ID: 1")
+
+"""
+When we create an album withouth passing a title, release_year or artist_id
+Then the form shows some errors
+"""
+def test_create_album_with_errors(page, test_web_address, db_connection):
+    page.set_default_timeout(1000)
+    db_connection.seed('seeds/music_web_app.sql')
+    page.goto(f"http://{test_web_address}/albums")
+    page.click("text='Add new album'")
+    page.click("text='Add Album'")
+
+    errors_tag = page.locator(".t-errors")
+    expect(errors_tag).to_have_text("Your form contained errors: Title can't be blank, Release Year can't be blank, Artist ID can't be blank")
+     
+
+"""
+When we create a new artist using a html form
+We see the new artist listed on the artists page
+"""
+def test_create_new_artist_from_form(page, test_web_address, db_connection):
+    page.set_default_timeout(1000)
+    db_connection.seed('seeds/music_web_app.sql')
+    page.goto(f"http://{test_web_address}/artists")
+    page.click("text='Add new artist'")

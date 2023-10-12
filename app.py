@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 from lib.database_connection import get_flask_database_connection
 from lib.album_repository import AlbumRepository
 from lib.album import Album
@@ -10,24 +10,46 @@ from lib.artist import Artist
 # Create a new Flask app
 app = Flask(__name__)
 
-# == Your Routes Here ==
+
+# -------- ROUTES ALBUMS-----------
+
+# # POST /albums
+# # with body paramaters: title=Voyage, release_year=2022, artist_id=2
+# @app.route('/albums', methods = ['POST'])
+# def create_album():
+#     if has_invalid_album_parameters(request.form):
+#         return "You need to submit a title, release_year, and artist_id", 400
+#     connection = get_flask_database_connection(app)
+#     repository = AlbumRepository(connection)
+#     title = request.form['title']
+#     release_year = request.form['release_year']
+#     artist_id = request.form['artist_id']
+
+#     new_album = Album(None, title, release_year, artist_id)
+#     repository.create(new_album) 
+#     return '', 200
+ 
+
 
 # POST /albums
-# with body paramaters: title=Voyage, release_year=2022, artist_id=2
 @app.route('/albums', methods = ['POST'])
-def post_album():
-    if has_invalid_album_parameters(request.form):
-        return "You need to submit a title, release_year, and artist_id", 400
+def create_album():
     connection = get_flask_database_connection(app)
     repository = AlbumRepository(connection)
+
     title = request.form['title']
     release_year = request.form['release_year']
     artist_id = request.form['artist_id']
-
     new_album = Album(None, title, release_year, artist_id)
-    repository.create(new_album)
-    return '', 200
- 
+
+    if not new_album.is_valid():
+        errors = new_album.generate_errors()
+        return render_template("albums/new_album.html", errors= errors)
+
+
+    repository.create(new_album) 
+
+    return redirect(f"/albums/{new_album.id}")
 
 
  # GET /albums
@@ -46,15 +68,27 @@ def get_single_album(id):
     connection = get_flask_database_connection(app)
     repository = AlbumRepository(connection)
     album = repository.find(id)
-    artist = repository.find_artist_by_album_id(id)
+    # artist = repository.find_artist_by_album_id(id)
 
-    return render_template('albums/single_album.html' , album=album, artist=artist)
+    return render_template('albums/single_album.html' , album=album)
 
 def has_invalid_album_parameters(form):
     return 'title' not in form or \
         'release_year' not in form \
         or 'artist_id' not in form 
-              
+
+
+#GET /albums/new
+@app.route('/albums/new')
+def get_book_new():
+    return render_template('albums/new_album.html')
+
+#POST /albums
+
+
+
+# --------------ROUTES ARTISTS -------  
+#       
 # GET /artists/1
 @app.route('/artists/<id>')
 def get_single_artist(id):
@@ -92,27 +126,6 @@ def has_invalid_artist_parameters(form):
     return 'name' not in form or \
         'genre' not in form
 
-
-
-# == Example Code Below ==
-
-# GET /emoji
-# Returns a smiley face in HTML
-# Try it:
-#   ; open http://localhost:5001/emoji
-@app.route('/emoji', methods=['GET'])
-def get_emoji():
-    # We use `render_template` to send the user the file `emoji.html`
-    # But first, it gets processed to look for placeholders like {{ emoji }}
-    # These placeholders are replaced with the values we pass in as arguments
-    return render_template('emoji.html', emoji=':)')
-
-# This imports some more example routes for you to see how they work
-# You can delete these lines if you don't need them.
-from example_routes import apply_example_routes
-apply_example_routes(app)
-
-# == End Example Code ==
 
 # These lines start the server if you run this file directly
 # They also start the server configured to use the test database
